@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Enquête Étudiants</title>
+</head>
+<body>
+  <h1>Bienvenue sur notre page d'enquête !</h1>
+  <form id="enqueteForm">
+    Genre: 
+    <select name="genre" required>
+      <option value="F">F</option>
+      <option value="M">M</option>
+    </select><br><br>
+
+    Âge: <input type="number" name="age" required><br><br>
+
+    Boursier: 
+    <select name="boursier" required>
+      <option value="true">Oui</option>
+      <option value="false">Non</option>
+    </select><br><br>
+
+    Pays d'origine: <input type="text" name="pays_origine" required><br><br>
+
+    Parcours: 
+    <select name="parcours" required>
+      <option value="PG">P.G</option>
+      <option value="Data science">Data science</option>
+      <option value="Economie">Économie</option>
+      <option value="BF">BF</option>
+    </select><br><br>
+
+    Master de rêve: <input type="text" name="master_reve"><br><br>
+
+    Si non accepté cette année: <input type="text" name="plan_b"><br><br>
+
+    Métier de rêve: <input type="text" name="metier_reve"><br><br>
+
+    Niveau d'anglais: 
+    <select name="niveau_anglais" required>
+      <option value="Excellent">Excellent</option>
+      <option value="Intermediaire">Intermédiaire</option>
+      <option value="Debutant">Débutant</option>
+      <option value="Neant">Néant</option>
+    </select><br><br>
+
+    Sport favori: <input type="text" name="sport_favori"><br><br>
+
+    Niveau de stress (1 à 10): <input type="number" name="stress_exam" min="1" max="10" required><br><br>
+
+    <button type="submit">Envoyer</button>
+  </form>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // ⚠️ Remplace par ton URL et ta clé publiable
+    const supabase = createClient(
+      'https://iynscjjyyznyshlmvmyv.supabase.co',
+      'sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu'
+    )
+
+    document.getElementById('enqueteForm').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const formData = new FormData(e.target)
+      const data = Object.fromEntries(formData.entries())
+
+      // Convertir boursier en booléen
+      data.boursier = data.boursier === "true"
+
+      const { error } = await supabase.from('enquete').insert([data])
+      if (error) {
+        alert("Erreur: " + error.message)
+      } else {
+        alert("Merci, vos réponses ont été enregistrées !")
+        e.target.reset()
+      }
+    })
+  </script>
+</body>
+</html>
