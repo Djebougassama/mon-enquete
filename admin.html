@@ -1,116 +1,347 @@
+<!-- <!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+body { font-family: Arial; background:#f4f6f9; padding:20px; }
+h1 { text-align:center; margin-bottom:30px; }
+.summary { display:flex; gap:20px; margin-bottom:30px; }
+.card { flex:1; background:white; padding:20px; border-radius:10px; box-shadow:0 5px 15px rgba(0,0,0,0.1); text-align:center;}
+.card h2 { margin:0; font-size:24px; color:#5b6cff;}
+table { width:100%; border-collapse:collapse; background:white;}
+th,td { padding:10px; border:1px solid #ddd;}
+th { background:#5b6cff; color:white;}
+</style>
+</head>
+<body>
+
+<h1>Tableau de bord des résultats</h1>
+
+<div class="summary">
+  <div class="card"><h2 id="total">0</h2><p>Réponses</p></div>
+  <div class="card"><h2 id="age">0</h2><p>Âge moyen</p></div>
+  <div class="card"><h2 id="stress">0</h2><p>Stress moyen</p></div>
+  <div class="card"><h2 id="boursiers">0</h2><p>Boursiers</p></div>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Genre</th>
+<th>Âge</th>
+<th>Boursier</th>
+<th>Pays</th>
+<th>Parcours</th>
+<th>Master</th>
+<th>Métier</th>
+<th>Anglais</th>
+<th>Sport</th>
+<th>Stress</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+const SUPABASE_URL = "https://iynscjjyyznyshlmvmyv.supabase.co"; // ✅ corrigé
+const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu";
+
+const { createClient } = supabase;
+const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function loadData() {
+  const { data, error } = await client
+    .from("enquete")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    alert("Erreur Supabase : " + error.message);
+    return;
+  }
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  let totalAge = 0;
+  let totalStress = 0;
+  let boursiers = 0;
+
+  data.forEach(row => {
+    totalAge += row.age;
+    totalStress += row.stress_exam;
+    if (row.boursier === true) boursiers++;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.id}</td>
+      <td>${row.genre}</td>
+      <td>${row.age}</td>
+      <td>${row.boursier ? "Oui" : "Non"}</td>
+      <td>${row.pays_origine}</td>
+      <td>${row.parcours}</td>
+      <td>${row.master_reve}</td>
+      <td>${row.metier_reve}</td>
+      <td>${row.niveau_anglais}</td>
+      <td>${row.sport_favori}</td>
+      <td>${row.stress_exam}</td>
+      <td>${new Date(row.created_at).toLocaleString()}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (data.length > 0) {
+    document.getElementById("total").textContent = data.length;
+    document.getElementById("age").textContent = (totalAge / data.length).toFixed(1);
+    document.getElementById("stress").textContent = (totalStress / data.length).toFixed(1);
+    document.getElementById("boursiers").textContent = boursiers;
+  }
+}
+
+loadData();
+</script>
+
+</body>
+</html> -->
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Tableau de bord des résultats</title>
-  <!-- Charger Supabase JS v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; }
-    h1 { text-align: center; margin-bottom: 30px; }
-    .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
-    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; flex: 1; margin: 0 10px; }
-    .card h2 { margin: 0; font-size: 24px; color: #007BFF; }
-    .card p { margin: 5px 0 0; color: #555; }
-    .actions { text-align: center; margin-bottom: 30px; }
-    .actions button { padding: 10px 20px; margin: 0 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #fff; }
-    .export-btn { background: #28a745; }
-    .export-btn:hover { background: #218838; }
-    .refresh-btn { background: #007BFF; }
-    .refresh-btn:hover { background: #0056b3; }
-    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-    th { background: #007BFF; color: #fff; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Admin Premium</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+
+body{
+  background:linear-gradient(135deg,#1e1f3f,#302b63,#24243e);
+  color:white;
+  padding:40px;
+}
+
+h1{
+  text-align:center;
+  margin-bottom:40px;
+  font-size:32px;
+  font-weight:700;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:40px;
+}
+
+.card{
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(15px);
+  padding:25px;
+  border-radius:20px;
+  text-align:center;
+  box-shadow:0 15px 30px rgba(0,0,0,0.3);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform:translateY(-5px);
+}
+
+.card h2{
+  font-size:28px;
+  margin-bottom:8px;
+  color:#8f94fb;
+}
+
+.actions{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+button{
+  padding:12px 25px;
+  margin:0 10px;
+  border:none;
+  border-radius:30px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+.export-btn{
+  background:linear-gradient(45deg,#00c6ff,#0072ff);
+  color:white;
+}
+
+.export-btn:hover{
+  transform:scale(1.05);
+}
+
+.refresh-btn{
+  background:linear-gradient(45deg,#ff512f,#dd2476);
+  color:white;
+}
+
+.refresh-btn:hover{
+  transform:scale(1.05);
+}
+
+.table-container{
+  overflow-x:auto;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(15px);
+  padding:20px;
+  border-radius:20px;
+  box-shadow:0 15px 30px rgba(0,0,0,0.3);
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  color:white;
+}
+
+th,td{
+  padding:12px;
+  text-align:left;
+}
+
+th{
+  background:rgba(255,255,255,0.15);
+}
+
+tr:nth-child(even){
+  background:rgba(255,255,255,0.05);
+}
+
+tr:hover{
+  background:rgba(255,255,255,0.1);
+}
+</style>
 </head>
+
 <body>
-  <h1>Tableau de bord des résultats</h1>
 
-  <!-- Résumé -->
-  <div class="summary">
-    <div class="card"><h2 id="total">0</h2><p>Réponses totales</p></div>
-    <div class="card"><h2 id="age">0</h2><p>Âge moyen</p></div>
-    <div class="card"><h2 id="stress">0/10</h2><p>Stress moyen</p></div>
-    <div class="card"><h2 id="boursiers">0</h2><p>Étudiants boursiers</p></div>
-  </div>
+<h1>📊 Dashboard Administrateur</h1>
 
-  <!-- Boutons -->
-  <div class="actions">
-    <button class="export-btn" onclick="exportExcel()">Exporter vers Excel</button>
-    <button class="refresh-btn" onclick="loadData()">Actualiser les données</button>
-  </div>
+<div class="summary">
+  <div class="card"><h2 id="total">0</h2><p>Réponses</p></div>
+  <div class="card"><h2 id="age">0</h2><p>Âge moyen</p></div>
+  <div class="card"><h2 id="stress">0</h2><p>Stress moyen</p></div>
+  <div class="card"><h2 id="boursiers">0</h2><p>Boursiers</p></div>
+</div>
 
-  <!-- Tableau -->
-  <h2>Détails des réponses</h2>
-  <table id="data-table">
-    <thead>
-      <tr>
-        <th>ID</th><th>Genre</th><th>Âge</th><th>Boursier</th><th>Pays</th>
-        <th>Parcours</th><th>Master souhaité</th><th>Métier rêvé</th>
-        <th>Anglais</th><th>Sport</th><th>Stress</th><th>Date</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<div class="actions">
+  <button class="export-btn" onclick="exportExcel()">📤 Exporter en Excel</button>
+  <button class="refresh-btn" onclick="loadData()">🔄 Actualiser</button>
+</div>
 
-  <script>
-    // ⚠️ Remplace par tes vraies infos Supabase
-    const SUPABASE_URL = "https://iynscjjyyznyshlmmyv.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu";
+<div class="table-container">
+<table id="data-table">
+<thead>
+<tr>
+<th>ID</th>
+<th>Genre</th>
+<th>Âge</th>
+<th>Boursier</th>
+<th>Pays</th>
+<th>Parcours</th>
+<th>Master</th>
+<th>Métier</th>
+<th>Anglais</th>
+<th>Sport</th>
+<th>Stress</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
 
-    // Initialiser correctement le client Supabase
-    const { createClient } = supabase;
-    const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+const SUPABASE_URL = "https://iynscjjyyznyshlmvmyv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu";
 
-    async function loadData() {
-      const { data, error } = await client.from("enquete").select("*");
-      if (error) {
-        console.error("Erreur Supabase:", error);
-        return;
-      }
+const { createClient } = supabase;
+const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      const tbody = document.querySelector("#data-table tbody");
-      tbody.innerHTML = "";
-      let totalAge = 0, totalStress = 0, boursiers = 0;
+let globalData = [];
 
-      data.forEach(row => {
-        totalAge += row.age;
-        totalStress += row.stress;
-        if (row.boursier === "Oui") boursiers++;
+async function loadData(){
+  const { data, error } = await client
+    .from("enquete")
+    .select("*")
+    .order("created_at",{ascending:false});
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>#${row.id}</td>
-          <td>${row.genre}</td>
-          <td>${row.age}</td>
-          <td>${row.boursier}</td>
-          <td>${row.pays}</td>
-          <td>${row.parcours}</td>
-          <td>${row.master}</td>
-          <td>${row.metier}</td>
-          <td>${row.anglais}</td>
-          <td>${row.sport}</td>
-          <td>${row.stress}</td>
-          <td>${row.created_at}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+  if(error){
+    alert(error.message);
+    return;
+  }
 
-      // Mettre à jour le résumé
-      if (data.length > 0) {
-        document.getElementById("total").textContent = data.length;
-        document.getElementById("age").textContent = (totalAge / data.length).toFixed(1);
-        document.getElementById("stress").textContent = (totalStress / data.length).toFixed(1) + "/10";
-        document.getElementById("boursiers").textContent = boursiers;
-      }
-    }
+  globalData = data;
 
-    function exportExcel() {
-      alert("Ici tu peux utiliser SheetJS (xlsx.js) pour exporter les données en Excel.");
-    }
+  const tbody = document.querySelector("#data-table tbody");
+  tbody.innerHTML = "";
 
-    // Charger au démarrage
-    loadData();
-  </script>
+  let totalAge=0,totalStress=0,boursiers=0;
+
+  data.forEach(row=>{
+    totalAge+=row.age;
+    totalStress+=row.stress_exam;
+    if(row.boursier===true) boursiers++;
+
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${row.id}</td>
+      <td>${row.genre}</td>
+      <td>${row.age}</td>
+      <td>${row.boursier?"Oui":"Non"}</td>
+      <td>${row.pays_origine}</td>
+      <td>${row.parcours}</td>
+      <td>${row.master_reve||""}</td>
+      <td>${row.metier_reve||""}</td>
+      <td>${row.niveau_anglais}</td>
+      <td>${row.sport_favori||""}</td>
+      <td>${row.stress_exam}</td>
+      <td>${new Date(row.created_at).toLocaleString()}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if(data.length>0){
+    document.getElementById("total").textContent=data.length;
+    document.getElementById("age").textContent=(totalAge/data.length).toFixed(1);
+    document.getElementById("stress").textContent=(totalStress/data.length).toFixed(1);
+    document.getElementById("boursiers").textContent=boursiers;
+  }
+}
+
+function exportExcel(){
+  if(globalData.length===0){
+    alert("Aucune donnée à exporter.");
+    return;
+  }
+
+  const worksheet = XLSX.utils.json_to_sheet(globalData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Enquete");
+  XLSX.writeFile(workbook, "resultats_enquete.xlsx");
+}
+
+loadData();
+</script>
+
 </body>
 </html>
