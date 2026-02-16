@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -78,5 +78,322 @@
       }
     })
   </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enquête - Analyse de données</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  background:#f4f6fb;
+}
+
+header{
+  background:linear-gradient(135deg,#5b6cff,#7b3ff2);
+  color:white;
+  text-align:center;
+  padding:40px 20px;
+  border-bottom-left-radius:25px;
+  border-bottom-right-radius:25px;
+}
+
+header h1{
+  font-size:26px;
+  font-weight:700;
+}
+
+header p{
+  opacity:0.9;
+  margin-top:10px;
+  font-size:14px;
+}
+
+.container{
+  max-width:850px;
+  margin:40px auto;
+  padding:0 20px;
+}
+
+.card{
+  background:white;
+  padding:25px;
+  border-radius:15px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.05);
+  margin-bottom:25px;
+  border-left:4px solid #5b6cff;
+}
+
+.card h2{
+  font-size:16px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#5b6cff;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+
+.form-group{
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  font-size:13px;
+  margin-bottom:6px;
+  color:#555;
+}
+
+input,select,textarea{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  font-size:14px;
+  transition:0.3s;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:#5b6cff;
+  outline:none;
+  box-shadow:0 0 0 3px rgba(91,108,255,0.15);
+}
+
+textarea{
+  resize:none;
+}
+
+.slider-container{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+input[type="range"]{
+  flex:1;
+  accent-color:#5b6cff;
+}
+
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#5b6cff,#7b3ff2);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(91,108,255,0.4);
+}
+
+button:disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+}
+
+.loading{
+  text-align:center;
+  font-size:13px;
+  color:#666;
+  margin-top:10px;
+  display:none;
+}
+
+footer{
+  text-align:center;
+  font-size:12px;
+  color:#777;
+  margin-top:15px;
+}
+
+@media(max-width:700px){
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>📊 Enquête - Analyse de données</h1>
+  <p>Vos réponses nous aideront à mieux comprendre les parcours et aspirations des étudiants.</p>
+</header>
+
+<div class="container">
+
+<form id="enqueteForm">
+
+<!-- Informations personnelles -->
+<div class="card">
+  <h2><i class="fa-solid fa-user"></i> Informations personnelles</h2>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Genre *</label>
+      <select name="genre" required>
+        <option value="">Choisir</option>
+        <option value="F">Féminin</option>
+        <option value="M">Masculin</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Âge *</label>
+      <input type="number" name="age" required>
+    </div>
+
+    <div class="form-group">
+      <label>Boursier *</label>
+      <select name="boursier" required>
+        <option value="">Choisir</option>
+        <option value="true">Oui</option>
+        <option value="false">Non</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Pays d'origine *</label>
+      <input type="text" name="pays_origine" required>
+    </div>
+  </div>
+</div>
+
+<!-- Parcours académique -->
+<div class="card">
+  <h2><i class="fa-solid fa-graduation-cap"></i> Parcours académique</h2>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Parcours *</label>
+      <select name="parcours" required>
+        <option value="">Choisir</option>
+        <option value="PG">P.G</option>
+        <option value="Data science">Data science</option>
+        <option value="Economie">Économie</option>
+        <option value="BF">BF</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Master de rêve</label>
+      <input type="text" name="master_reve">
+    </div>
+  </div>
+
+  <div class="form-group" style="margin-top:15px;">
+    <label>Plan B si non accepté</label>
+    <textarea name="plan_b" rows="3"></textarea>
+  </div>
+</div>
+
+<!-- Préférences -->
+<div class="card">
+  <h2><i class="fa-solid fa-chart-line"></i> Préférences et compétences</h2>
+
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Métier de rêve</label>
+      <input type="text" name="metier_reve">
+    </div>
+
+    <div class="form-group">
+      <label>Niveau d'anglais *</label>
+      <select name="niveau_anglais" required>
+        <option value="">Choisir</option>
+        <option value="Excellent">Excellent</option>
+        <option value="Intermediaire">Intermédiaire</option>
+        <option value="Debutant">Débutant</option>
+        <option value="Neant">Néant</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Sport favori</label>
+      <input type="text" name="sport_favori">
+    </div>
+  </div>
+
+  <div class="form-group" style="margin-top:15px;">
+    <label>Niveau de stress (1 à 10)</label>
+    <div class="slider-container">
+      <span>1</span>
+      <input type="range" name="stress_exam" min="1" max="10" value="5">
+      <span>10</span>
+    </div>
+  </div>
+</div>
+
+<button type="submit" id="submitBtn">Envoyer mes réponses 🚀</button>
+<div class="loading" id="loadingText">Envoi en cours...</div>
+
+</form>
+
+<footer>
+  Vos données sont traitées de manière confidentielle.
+</footer>
+
+</div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+const supabase = createClient(
+  'https://iynscjjyyznyshlmvmyv.supabase.co',
+  'sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu'
+)
+
+const form = document.getElementById('enqueteForm')
+const submitBtn = document.getElementById('submitBtn')
+const loadingText = document.getElementById('loadingText')
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+  submitBtn.disabled = true
+  loadingText.style.display = "block"
+
+  const formData = new FormData(form)
+  const data = Object.fromEntries(formData.entries())
+  data.boursier = data.boursier === "true"
+
+  const { error } = await supabase.from('enquete').insert([data])
+
+  if (error) {
+    alert("Erreur: " + error.message)
+    submitBtn.disabled = false
+    loadingText.style.display = "none"
+  } else {
+    window.location.href = "merci.html"
+  }
+})
+</script>
+
 </body>
 </html>

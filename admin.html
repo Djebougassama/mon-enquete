@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau de bord des résultats</title>
+  <!-- Charger Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 30px; }
+    .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
+    .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; flex: 1; margin: 0 10px; }
+    .card h2 { margin: 0; font-size: 24px; color: #007BFF; }
+    .card p { margin: 5px 0 0; color: #555; }
+    .actions { text-align: center; margin-bottom: 30px; }
+    .actions button { padding: 10px 20px; margin: 0 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; color: #fff; }
+    .export-btn { background: #28a745; }
+    .export-btn:hover { background: #218838; }
+    .refresh-btn { background: #007BFF; }
+    .refresh-btn:hover { background: #0056b3; }
+    table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background: #007BFF; color: #fff; }
+  </style>
+</head>
+<body>
+  <h1>Tableau de bord des résultats</h1>
+
+  <!-- Résumé -->
+  <div class="summary">
+    <div class="card"><h2 id="total">0</h2><p>Réponses totales</p></div>
+    <div class="card"><h2 id="age">0</h2><p>Âge moyen</p></div>
+    <div class="card"><h2 id="stress">0/10</h2><p>Stress moyen</p></div>
+    <div class="card"><h2 id="boursiers">0</h2><p>Étudiants boursiers</p></div>
+  </div>
+
+  <!-- Boutons -->
+  <div class="actions">
+    <button class="export-btn" onclick="exportExcel()">Exporter vers Excel</button>
+    <button class="refresh-btn" onclick="loadData()">Actualiser les données</button>
+  </div>
+
+  <!-- Tableau -->
+  <h2>Détails des réponses</h2>
+  <table id="data-table">
+    <thead>
+      <tr>
+        <th>ID</th><th>Genre</th><th>Âge</th><th>Boursier</th><th>Pays</th>
+        <th>Parcours</th><th>Master souhaité</th><th>Métier rêvé</th>
+        <th>Anglais</th><th>Sport</th><th>Stress</th><th>Date</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // ⚠️ Remplace par tes vraies infos Supabase
+    const SUPABASE_URL = "https://iynscjjyyznyshlmmyv.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu";
+
+    // Initialiser correctement le client Supabase
+    const { createClient } = supabase;
+    const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    async function loadData() {
+      const { data, error } = await client.from("enquete").select("*");
+      if (error) {
+        console.error("Erreur Supabase:", error);
+        return;
+      }
+
+      const tbody = document.querySelector("#data-table tbody");
+      tbody.innerHTML = "";
+      let totalAge = 0, totalStress = 0, boursiers = 0;
+
+      data.forEach(row => {
+        totalAge += row.age;
+        totalStress += row.stress;
+        if (row.boursier === "Oui") boursiers++;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>#${row.id}</td>
+          <td>${row.genre}</td>
+          <td>${row.age}</td>
+          <td>${row.boursier}</td>
+          <td>${row.pays}</td>
+          <td>${row.parcours}</td>
+          <td>${row.master}</td>
+          <td>${row.metier}</td>
+          <td>${row.anglais}</td>
+          <td>${row.sport}</td>
+          <td>${row.stress}</td>
+          <td>${row.created_at}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Mettre à jour le résumé
+      if (data.length > 0) {
+        document.getElementById("total").textContent = data.length;
+        document.getElementById("age").textContent = (totalAge / data.length).toFixed(1);
+        document.getElementById("stress").textContent = (totalStress / data.length).toFixed(1) + "/10";
+        document.getElementById("boursiers").textContent = boursiers;
+      }
+    }
+
+    function exportExcel() {
+      alert("Ici tu peux utiliser SheetJS (xlsx.js) pour exporter les données en Excel.");
+    }
+
+    // Charger au démarrage
+    loadData();
+  </script>
+</body>
+</html>
