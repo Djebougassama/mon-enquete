@@ -259,6 +259,7 @@ tr:hover{
 <th>Pays</th>
 <th>Parcours</th>
 <th>Master</th>
+<th>Plan B</th>
 <th>Métier</th>
 <th>Anglais</th>
 <th>Sport</th>
@@ -303,21 +304,21 @@ async function loadData(){
     if(row.boursier===true) boursiers++;
 
     const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${row.id}</td>
-      <td>${row.genre}</td>
-      <td>${row.age}</td>
-      <td>${row.boursier?"Oui":"Non"}</td>
-      <td>${row.pays_origine}</td>
-      <td>${row.parcours}</td>
-      <td>${row.master_reve||""}</td>
-      <td>${row.metier_reve||""}</td>
-      <td>${row.niveau_anglais}</td>
-      <td>${row.sport_favori||""}</td>
-      <td>${row.stress_exam}</td>
-      <td>${new Date(row.created_at).toLocaleString()}</td>
-    `;
-    tbody.appendChild(tr);
+   tr.innerHTML=`
+  <td>${row.id}</td>
+  <td>${row.genre}</td>
+  <td>${row.age}</td>
+  <td>${row.boursier?"Oui":"Non"}</td>
+  <td>${row.pays_origine}</td>
+  <td>${row.parcours}</td>
+  <td>${row.master_reve||""}</td>
+  <td>${row.plan_b||""}</td> <!-- AJOUT ICI -->
+  <td>${row.metier_reve||""}</td>
+  <td>${row.niveau_anglais}</td>
+  <td>${row.sport_favori||""}</td>
+  <td>${row.stress_exam}</td>
+  <td>${new Date(row.created_at).toLocaleString()}</td>
+`;
   });
 
   if(data.length>0){
