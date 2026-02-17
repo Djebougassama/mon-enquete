@@ -185,17 +185,9 @@ button{
   color:white;
 }
 
-.export-btn:hover{
-  transform:scale(1.05);
-}
-
 .refresh-btn{
   background:linear-gradient(45deg,#ff512f,#dd2476);
   color:white;
-}
-
-.refresh-btn:hover{
-  transform:scale(1.05);
 }
 
 .table-container{
@@ -299,26 +291,28 @@ async function loadData(){
   let totalAge=0,totalStress=0,boursiers=0;
 
   data.forEach(row=>{
-    totalAge+=row.age;
-    totalStress+=row.stress_exam;
+
+    totalAge += Number(row.age || 0);
+    totalStress += Number(row.stress_exam || 0);
     if(row.boursier===true) boursiers++;
 
     const tr=document.createElement("tr");
-   tr.innerHTML=`
-  <td>${row.id}</td>
-  <td>${row.genre}</td>
-  <td>${row.age}</td>
-  <td>${row.boursier?"Oui":"Non"}</td>
-  <td>${row.pays_origine}</td>
-  <td>${row.parcours}</td>
-  <td>${row.master_reve||""}</td>
-  <td>${row.plan_b||""}</td> <!-- AJOUT ICI -->
-  <td>${row.metier_reve||""}</td>
-  <td>${row.niveau_anglais}</td>
-  <td>${row.sport_favori||""}</td>
-  <td>${row.stress_exam}</td>
-  <td>${new Date(row.created_at).toLocaleString()}</td>
-`;
+    tr.innerHTML=`
+      <td>${row.id}</td>
+      <td>${row.genre||""}</td>
+      <td>${row.age||""}</td>
+      <td>${row.boursier?"Oui":"Non"}</td>
+      <td>${row.pays_origine||""}</td>
+      <td>${row.parcours||""}</td>
+      <td>${row.master_reve||""}</td>
+      <td>${row.plan_b||""}</td>
+      <td>${row.metier_reve||""}</td>
+      <td>${row.niveau_anglais||""}</td>
+      <td>${row.sport_favori||""}</td>
+      <td>${row.stress_exam||""}</td>
+      <td>${row.created_at ? new Date(row.created_at).toLocaleString() : ""}</td>
+    `;
+    tbody.appendChild(tr);
   });
 
   if(data.length>0){
@@ -335,7 +329,23 @@ function exportExcel(){
     return;
   }
 
-  const worksheet = XLSX.utils.json_to_sheet(globalData);
+  const formattedData = globalData.map(row => ({
+    ID: row.id,
+    Genre: row.genre,
+    Age: row.age,
+    Boursier: row.boursier ? "Oui" : "Non",
+    Pays: row.pays_origine,
+    Parcours: row.parcours,
+    Master: row.master_reve,
+    "Plan B": row.plan_b,
+    Metier: row.metier_reve,
+    Anglais: row.niveau_anglais,
+    Sport: row.sport_favori,
+    Stress: row.stress_exam,
+    Date: row.created_at
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(formattedData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Enquete");
   XLSX.writeFile(workbook, "resultats_enquete.xlsx");
