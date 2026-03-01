@@ -135,7 +135,6 @@ h1{
   text-align:center;
   margin-bottom:40px;
   font-size:32px;
-  font-weight:700;
 }
 
 .summary{
@@ -151,18 +150,6 @@ h1{
   padding:25px;
   border-radius:20px;
   text-align:center;
-  box-shadow:0 15px 30px rgba(0,0,0,0.3);
-  transition:0.3s;
-}
-
-.card:hover{
-  transform:translateY(-5px);
-}
-
-.card h2{
-  font-size:28px;
-  margin-bottom:8px;
-  color:#8f94fb;
 }
 
 .actions{
@@ -177,7 +164,6 @@ button{
   border-radius:30px;
   font-weight:600;
   cursor:pointer;
-  transition:0.3s;
 }
 
 .export-btn{
@@ -193,21 +179,17 @@ button{
 .table-container{
   overflow-x:auto;
   background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(15px);
   padding:20px;
   border-radius:20px;
-  box-shadow:0 15px 30px rgba(0,0,0,0.3);
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  color:white;
 }
 
 th,td{
   padding:12px;
-  text-align:left;
 }
 
 th{
@@ -216,10 +198,6 @@ th{
 
 tr:nth-child(even){
   background:rgba(255,255,255,0.05);
-}
-
-tr:hover{
-  background:rgba(255,255,255,0.1);
 }
 </style>
 </head>
@@ -236,12 +214,13 @@ tr:hover{
 </div>
 
 <div class="actions">
-  <button class="export-btn" onclick="exportExcel()">📤 Exporter en Excel</button>
+  <button class="export-btn" onclick="exportExcel()">📤 Exporter Excel</button>
   <button class="refresh-btn" onclick="loadData()">🔄 Actualiser</button>
 </div>
 
 <div class="table-container">
 <table id="data-table">
+
 <thead>
 <tr>
 <th>ID</th>
@@ -259,99 +238,151 @@ tr:hover{
 <th>Date</th>
 </tr>
 </thead>
+
 <tbody></tbody>
+
 </table>
 </div>
 
 <script>
+
 const SUPABASE_URL = "https://iynscjjyyznyshlmvmyv.supabase.co";
 const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu";
 
-const { createClient } = supabase;
-const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let globalData = [];
 
 async function loadData(){
-  const { data, error } = await client
-    .from("enquete")
-    .select("*")
-    .order("created_at",{ascending:false});
 
-  if(error){
-    alert(error.message);
-    return;
-  }
+const { data, error } = await client
+.from("enquete")
+.select("*")
+.order("created_at",{ascending:false});
 
-  globalData = data;
-
-  const tbody = document.querySelector("#data-table tbody");
-  tbody.innerHTML = "";
-
-  let totalAge=0,totalStress=0,boursiers=0;
-
-  data.forEach(row=>{
-
-    totalAge += Number(row.age || 0);
-    totalStress += Number(row.stress_exam || 0);
-    if(row.boursier===true) boursiers++;
-
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${row.id}</td>
-      <td>${row.genre||""}</td>
-      <td>${row.age||""}</td>
-      <td>${row.boursier?"Oui":"Non"}</td>
-      <td>${row.pays_origine||""}</td>
-      <td>${row.parcours||""}</td>
-      <td>${row.master_reve||""}</td>
-      <td>${row.plan_b||""}</td>
-      <td>${row.metier_reve||""}</td>
-      <td>${row.niveau_anglais||""}</td>
-      <td>${row.sport_favori||""}</td>
-      <td>${row.stress_exam||""}</td>
-      <td>${row.created_at ? new Date(row.created_at).toLocaleString() : ""}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  if(data.length>0){
-    document.getElementById("total").textContent=data.length;
-    document.getElementById("age").textContent=(totalAge/data.length).toFixed(1);
-    document.getElementById("stress").textContent=(totalStress/data.length).toFixed(1);
-    document.getElementById("boursiers").textContent=boursiers;
-  }
+if(error){
+alert(error.message);
+return;
 }
+
+globalData = data;
+
+const tbody = document.querySelector("#data-table tbody");
+tbody.innerHTML="";
+
+let totalAge=0;
+let totalStress=0;
+let boursiers=0;
+
+data.forEach(row=>{
+
+totalAge += Number(row.age||0);
+totalStress += Number(row.stress_exam||0);
+
+if(row.boursier) boursiers++;
+
+let sportText="Non";
+
+if(row.sport_pratique==="Oui"){
+
+sportText = `${row.sport_type || ""} (${row.sport_frequence || 0}x/semaine)`;
+
+}
+
+const tr=document.createElement("tr");
+
+tr.innerHTML=`
+
+<td>${row.id}</td>
+<td>${row.genre||""}</td>
+<td>${row.age||""}</td>
+<td>${row.boursier?"Oui":"Non"}</td>
+<td>${row.pays_origine||""}</td>
+<td>${row.parcours||""}</td>
+<td>${row.master_reve||""}</td>
+<td>${row.plan_b||""}</td>
+<td>${row.metier_reve||""}</td>
+<td>${row.niveau_anglais||""}</td>
+<td>${sportText}</td>
+<td>${row.stress_exam||""}</td>
+<td>${row.created_at ? new Date(row.created_at).toLocaleString() : ""}</td>
+
+`;
+
+tbody.appendChild(tr);
+
+});
+
+document.getElementById("total").textContent=data.length;
+
+document.getElementById("age").textContent=
+data.length?(totalAge/data.length).toFixed(1):0;
+
+document.getElementById("stress").textContent=
+data.length?(totalStress/data.length).toFixed(1):0;
+
+document.getElementById("boursiers").textContent=boursiers;
+
+}
+
+
 
 function exportExcel(){
-  if(globalData.length===0){
-    alert("Aucune donnée à exporter.");
-    return;
-  }
 
-  const formattedData = globalData.map(row => ({
-    ID: row.id,
-    Genre: row.genre,
-    Age: row.age,
-    Boursier: row.boursier ? "Oui" : "Non",
-    Pays: row.pays_origine,
-    Parcours: row.parcours,
-    Master: row.master_reve,
-    "Plan B": row.plan_b,
-    Metier: row.metier_reve,
-    Anglais: row.niveau_anglais,
-    Sport: row.sport_favori,
-    Stress: row.stress_exam,
-    Date: row.created_at
-  }));
+if(globalData.length===0){
 
-  const worksheet = XLSX.utils.json_to_sheet(formattedData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Enquete");
-  XLSX.writeFile(workbook, "resultats_enquete.xlsx");
+alert("Aucune donnée");
+
+return;
+
 }
 
+const formattedData = globalData.map(row=>({
+
+ID:row.id,
+
+Genre:row.genre,
+
+Age:row.age,
+
+Boursier:row.boursier?"Oui":"Non",
+
+Pays:row.pays_origine,
+
+Parcours:row.parcours,
+
+Master:row.master_reve,
+
+PlanB:row.plan_b,
+
+Metier:row.metier_reve,
+
+Anglais:row.niveau_anglais,
+
+Sport:row.sport_pratique==="Oui"
+? `${row.sport_type} (${row.sport_frequence}x/semaine)`
+: "Non",
+
+Stress:row.stress_exam,
+
+Date:row.created_at
+
+}));
+
+const ws = XLSX.utils.json_to_sheet(formattedData);
+
+const wb = XLSX.utils.book_new();
+
+XLSX.utils.book_append_sheet(wb,ws,"Enquete");
+
+XLSX.writeFile(wb,"resultats_enquete.xlsx");
+
+}
+
+
+
 loadData();
+
 </script>
 
 </body>

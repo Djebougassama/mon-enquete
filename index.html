@@ -46,14 +46,6 @@ header p{
   padding:0 20px;
 }
 
-/* .stress-group {
-  margin-top: 15px;
-}
-
-.form-group + .form-group {
-  margin-top: 15px;
-} */
-
 .card{
   background:white;
   padding:25px;
@@ -229,7 +221,7 @@ footer{
         <option value="">Choisir</option>
         <option value="PG">Parcours.G</option>
         <option value="Data science">Data science</option>
-        <option value="Economie">Économie de sante</option>
+        <option value="Economie">Économie de santé</option>
         <option value="BF">BF</option>
       </select>
     </div>
@@ -241,7 +233,7 @@ footer{
   </div>
 
   <div class="form-group" style="margin-top:15px;">
-    <label>Plan B si vous n'etes pas accepté à un master  *</label>
+    <label>Plan B si vous n'êtes pas accepté à un master *</label>
     <textarea name="plan_b" rows="3" required></textarea>
   </div>
 </div>
@@ -251,6 +243,7 @@ footer{
   <h2><i class="fa-solid fa-chart-line"></i> Préférences et compétences</h2>
 
   <div class="form-grid">
+
     <div class="form-group">
       <label>Métier de rêve *</label>
       <input type="text" name="metier_reve" required>
@@ -267,25 +260,49 @@ footer{
       </select>
     </div>
 
+    <!-- pratique sport -->
     <div class="form-group">
-     <label>Pratiquez vous un sport ? *</label>
-      <select name="sport_favori" required>
+      <label>Pratiquez-vous un sport ? *</label>
+      <select name="sport_pratique" id="sport_pratique" required onchange="toggleSportFields()">
         <option value="">Choisir</option>
         <option value="Oui">Oui</option>
         <option value="Non">Non</option>
       </select>
     </div>
 
+    <!-- type sport -->
+    <div class="form-group" id="typeSportGroup" style="display:none;">
+      <label>Quel sport pratiquez-vous ? *</label>
+      <input type="text" name="sport_type" id="sport_type">
+    </div>
 
-  <div class="form-group stress-group">
-  <label>Quel est votre niveau de stress pour le master ? (1 à 10) *</label>
-  <div class="slider-container">
-    <span>1</span>
-    <input type="range" name="stress_exam" min="1" max="10" value="5" required>
-    <span>10</span>
+    <!-- fréquence -->
+    <div class="form-group" id="frequenceSportGroup" style="display:none;">
+      <label>Combien de fois par semaine ? *</label>
+      <select name="sport_frequence" id="sport_frequence">
+        <option value="">Choisir</option>
+        <option value="1">1 fois</option>
+        <option value="2">2 fois</option>
+        <option value="3">3 fois</option>
+        <option value="4">4 fois</option>
+        <option value="5">5 fois</option>
+        <option value="6">6 fois</option>
+        <option value="7">Tous les jours</option>
+      </select>
+    </div>
+
   </div>
-</div>
 
+  <div class="form-group" style="margin-top:15px;">
+    <label>Niveau de stress pour le master (1 à 10) *</label>
+    <div class="slider-container">
+      <span>1</span>
+      <input type="range" name="stress_exam" min="1" max="10" value="5" required>
+      <span>10</span>
+    </div>
+  </div>
+
+</div>
 
 <button type="submit" id="submitBtn">Envoyer mes réponses 🚀</button>
 <div class="loading" id="loadingText">Envoi en cours...</div>
@@ -299,6 +316,7 @@ footer{
 </div>
 
 <script type="module">
+
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabase = createClient(
@@ -306,11 +324,43 @@ const supabase = createClient(
   'sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu'
 )
 
+window.toggleSportFields = function(){
+
+  const sport = document.getElementById("sport_pratique").value;
+
+  const typeGroup = document.getElementById("typeSportGroup");
+  const freqGroup = document.getElementById("frequenceSportGroup");
+
+  const typeInput = document.getElementById("sport_type");
+  const freqInput = document.getElementById("sport_frequence");
+
+  if(sport==="Oui"){
+
+    typeGroup.style.display="flex";
+    freqGroup.style.display="flex";
+
+    typeInput.required=true;
+    freqInput.required=true;
+
+  }else{
+
+    typeGroup.style.display="none";
+    freqGroup.style.display="none";
+
+    typeInput.required=false;
+    freqInput.required=false;
+
+    typeInput.value="";
+    freqInput.value="";
+  }
+}
+
 const form = document.getElementById('enqueteForm')
 const submitBtn = document.getElementById('submitBtn')
 const loadingText = document.getElementById('loadingText')
 
 form.addEventListener('submit', async (e) => {
+
   e.preventDefault()
 
   submitBtn.disabled = true
@@ -318,18 +368,26 @@ form.addEventListener('submit', async (e) => {
 
   const formData = new FormData(form)
   const data = Object.fromEntries(formData.entries())
+
   data.boursier = data.boursier === "true"
 
   const { error } = await supabase.from('enquete').insert([data])
 
   if (error) {
+
     alert("Erreur: " + error.message)
+
     submitBtn.disabled = false
     loadingText.style.display = "none"
+
   } else {
+
     window.location.href = "merci.html"
+
   }
+
 })
+
 </script>
 
 </body>
