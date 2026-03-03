@@ -371,16 +371,27 @@ form.addEventListener('submit', async (e) => {
 
   data.boursier = data.boursier === "true"
 
-  const { error } = await supabase.from('enquete').insert([data])
+ // const { error } = await supabase.from('enquete').insert([data])
 
-  if (error) {
+  // ✅ CORRECTION ICI
+if(data.sport_pratique==="Non"){
+data.sport_type=null
+data.sport_frequence=null
+}else{
+data.sport_frequence=data.sport_frequence
+? parseInt(data.sport_frequence)
+: null
+}
 
-    alert("Erreur: " + error.message)
+const { error }=await supabase
+.from('enquete')
+.insert([data])
 
-    submitBtn.disabled = false
-    loadingText.style.display = "none"
-
-  } else {
+if(error){
+alert("Erreur: "+error.message)
+submitBtn.disabled=false
+loadingText.style.display="none"
+} else {
 
     window.location.href = "merci.html"
 
