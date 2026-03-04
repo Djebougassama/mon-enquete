@@ -110,7 +110,7 @@ loadData();
 </body>
 </html> -->
 
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -131,11 +131,7 @@ body{
   padding:40px;
 }
 
-h1{
-  text-align:center;
-  margin-bottom:40px;
-  font-size:32px;
-}
+h1{text-align:center;margin-bottom:40px;font-size:32px;}
 
 .summary{
   display:grid;
@@ -152,10 +148,7 @@ h1{
   text-align:center;
 }
 
-.actions{
-  text-align:center;
-  margin-bottom:30px;
-}
+.actions{text-align:center;margin-bottom:30px;}
 
 button{
   padding:12px 25px;
@@ -166,14 +159,34 @@ button{
   cursor:pointer;
 }
 
-.export-btn{
-  background:linear-gradient(45deg,#00c6ff,#0072ff);
-  color:white;
+.export-btn{background:linear-gradient(45deg,#00c6ff,#0072ff);color:white;}
+.refresh-btn{background:linear-gradient(45deg,#ff512f,#dd2476);color:white;}
+
+.search-container{text-align:center;margin-bottom:20px;}
+
+.search-container input{
+  padding:10px;
+  border-radius:20px;
+  border:none;
+  width:250px;
 }
 
-.refresh-btn{
-  background:linear-gradient(45deg,#ff512f,#dd2476);
+.filters-container{text-align:center;margin-bottom:20px;}
+
+.filters-container select{
+  padding:10px;
+  border-radius:20px;
+  border:none;
+  margin:5px;
+}
+
+.delete-btn{
+  background:#ff3b3b;
   color:white;
+  padding:6px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:12px;
 }
 
 .table-container{
@@ -183,22 +196,10 @@ button{
   border-radius:20px;
 }
 
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:12px;
-}
-
-th{
-  background:rgba(255,255,255,0.15);
-}
-
-tr:nth-child(even){
-  background:rgba(255,255,255,0.05);
-}
+table{width:100%;border-collapse:collapse;}
+th,td{padding:12px;}
+th{background:rgba(255,255,255,0.15);}
+tr:nth-child(even){background:rgba(255,255,255,0.05);}
 </style>
 </head>
 
@@ -218,9 +219,36 @@ tr:nth-child(even){
   <button class="refresh-btn" onclick="loadData()">🔄 Actualiser</button>
 </div>
 
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="🔎 Rechercher..." onkeyup="applyFilters()">
+</div>
+
+<div class="filters-container">
+<select id="filterGenre" onchange="applyFilters()">
+<option value="">Tous les genres</option>
+<option value="Homme">Homme</option>
+<option value="Femme">Femme</option>
+</select>
+
+<select id="filterBoursier" onchange="applyFilters()">
+<option value="">Tous</option>
+<option value="Oui">Boursier</option>
+<option value="Non">Non boursier</option>
+</select>
+
+<select id="filterSport" onchange="applyFilters()">
+<option value="">Sport (Tous)</option>
+<option value="Oui">Pratique un sport</option>
+<option value="Non">Ne pratique pas</option>
+</select>
+
+<select id="filterPays" onchange="applyFilters()">
+<option value="">Tous les pays</option>
+</select>
+</div>
+
 <div class="table-container">
 <table id="data-table">
-
 <thead>
 <tr>
 <th>ID</th>
@@ -236,18 +264,17 @@ tr:nth-child(even){
 <th>Sport</th>
 <th>Stress</th>
 <th>Date</th>
+<th>Action</th>
 </tr>
 </thead>
-
 <tbody></tbody>
-
 </table>
 </div>
 
 <script>
 
 const SUPABASE_URL = "https://iynscjjyyznyshlmvmyv.supabase.co";
-const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu";
+const SUPABASE_KEY = "sb_publishable_QAD4b1n2yGdkTyt5E2I_Ow_hFOe-syu"; // ⚠️ Mets ta vraie anon public key
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -266,6 +293,11 @@ return;
 }
 
 globalData = data;
+populatePaysFilter();
+applyFilters();
+}
+
+function displayData(data){
 
 const tbody = document.querySelector("#data-table tbody");
 tbody.innerHTML="";
@@ -278,21 +310,16 @@ data.forEach(row=>{
 
 totalAge += Number(row.age||0);
 totalStress += Number(row.stress_exam||0);
-
 if(row.boursier) boursiers++;
 
 let sportText="Non";
-
 if(row.sport_pratique==="Oui"){
-
 sportText = `${row.sport_type || ""} (${row.sport_frequence || 0}x/semaine)`;
-
 }
 
 const tr=document.createElement("tr");
 
 tr.innerHTML=`
-
 <td>${row.id}</td>
 <td>${row.genre||""}</td>
 <td>${row.age||""}</td>
@@ -306,84 +333,113 @@ tr.innerHTML=`
 <td>${sportText}</td>
 <td>${row.stress_exam||""}</td>
 <td>${row.created_at ? new Date(row.created_at).toLocaleString() : ""}</td>
-
+<td><button class="delete-btn" onclick="deleteRow(${row.id})">Supprimer</button></td>
 `;
 
 tbody.appendChild(tr);
-
 });
 
 document.getElementById("total").textContent=data.length;
-
-document.getElementById("age").textContent=
-data.length?(totalAge/data.length).toFixed(1):0;
-
-document.getElementById("stress").textContent=
-data.length?(totalStress/data.length).toFixed(1):0;
-
+document.getElementById("age").textContent=data.length?(totalAge/data.length).toFixed(1):0;
+document.getElementById("stress").textContent=data.length?(totalStress/data.length).toFixed(1):0;
 document.getElementById("boursiers").textContent=boursiers;
-
 }
 
+function applyFilters(){
 
+const genre=document.getElementById("filterGenre").value;
+const boursier=document.getElementById("filterBoursier").value;
+const sport=document.getElementById("filterSport").value;
+const pays=document.getElementById("filterPays").value;
+const search=document.getElementById("searchInput").value.toLowerCase();
+
+let filtered=globalData.filter(row=>{
+
+let match=true;
+
+if(genre && row.genre!==genre) match=false;
+
+if(boursier){
+if(boursier==="Oui" && !row.boursier) match=false;
+if(boursier==="Non" && row.boursier) match=false;
+}
+
+if(sport){
+if(sport==="Oui" && row.sport_pratique!=="Oui") match=false;
+if(sport==="Non" && row.sport_pratique==="Oui") match=false;
+}
+
+if(pays && row.pays_origine!==pays) match=false;
+
+if(search && !JSON.stringify(row).toLowerCase().includes(search)) match=false;
+
+return match;
+});
+
+displayData(filtered);
+}
+
+function populatePaysFilter(){
+const select=document.getElementById("filterPays");
+const paysUniques=[...new Set(globalData.map(r=>r.pays_origine).filter(Boolean))];
+
+select.innerHTML='<option value="">Tous les pays</option>';
+
+paysUniques.forEach(p=>{
+const option=document.createElement("option");
+option.value=p;
+option.textContent=p;
+select.appendChild(option);
+});
+}
+
+async function deleteRow(id){
+if(!confirm("Voulez-vous supprimer cette réponse ?")) return;
+
+const { error } = await client
+.from("enquete")
+.delete()
+.eq("id", id);
+
+if(error){
+alert(error.message);
+}else{
+loadData();
+}
+}
 
 function exportExcel(){
-
 if(globalData.length===0){
-
 alert("Aucune donnée");
-
 return;
-
 }
 
 const formattedData = globalData.map(row=>({
-
 ID:row.id,
-
 Genre:row.genre,
-
 Age:row.age,
-
 Boursier:row.boursier?"Oui":"Non",
-
 Pays:row.pays_origine,
-
 Parcours:row.parcours,
-
 Master:row.master_reve,
-
 PlanB:row.plan_b,
-
 Metier:row.metier_reve,
-
 Anglais:row.niveau_anglais,
-
 Sport:row.sport_pratique==="Oui"
 ? `${row.sport_type} (${row.sport_frequence}x/semaine)`
 : "Non",
-
 Stress:row.stress_exam,
-
 Date:row.created_at
-
 }));
 
-const ws = XLSX.utils.json_to_sheet(formattedData);
-
-const wb = XLSX.utils.book_new();
-
+const ws=XLSX.utils.json_to_sheet(formattedData);
+const wb=XLSX.utils.book_new();
 XLSX.utils.book_append_sheet(wb,ws,"Enquete");
-
 XLSX.writeFile(wb,"resultats_enquete.xlsx");
-
 }
-
-
 
 loadData();
 
 </script>
-
 </body>
 </html>
